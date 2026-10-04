@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}تسجيل الدخول - ServerEye{% endblock %}
+{% block auth_body %}
+<div class="login-page">
+  <div class="login-panel">
+    <div class="login-brand">
+      <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="ServerEye" class="login-logo">
+      <h1 class="login-title">ServerEye</h1>
+      <p class="login-sub">نظام المراقبة الاستباقية لأداء السيرفرات</p>
+    </div>
+    {% if error %}
+    <div class="flash flash-error">{{ error }}</div>
+    {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="post" action="{{ url_for('auth.login') }}" class="login-form" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label class="field">
+        <span>اسم المستخدم</span>
+        <input type="text" name="username" required maxlength="32" autofocus>
+      </label>
+      <label class="field">
+        <span>كلمة السر</span>
+        <input type="password" name="password" required>
+      </label>
+      <button type="submit" class="btn btn-primary btn-block">تسجيل الدخول</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

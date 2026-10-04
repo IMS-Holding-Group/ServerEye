@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}تفاصيل السيرفر - ServerEye{% endblock %}
+{% block page_title %}تفاصيل السيرفر: {{ server.name }}{% endblock %}
+{% block content %}
+<section class="section server-summary">
+  <div class="summary-grid">
+    <div>
+      <p class="muted">الحالة الحالية</p>
+      <span class="badge badge-{{ status }} badge-lg">{{ status }}</span>
+      {% if server.is_in_baseline %}<span class="tag">فترة تعلّم أولية</span>{% endif %}
+    </div>
+    <div>
+      <p class="muted">نوع النظام</p>
+      <strong>{{ server.os_type }}</strong>
+    </div>
+    <div>
+      <p class="muted">عنوان الشبكة</p>
+      <strong>{{ server.host_address }}</strong>
+    </div>
+    <div>
+      <p class="muted">تاريخ الإضافة</p>
+      <strong>{{ created_at_html }}</strong>
+    </div>
+    <div>
+      <p class="muted">آخر اتصال</p>
+      <strong>{{ last_seen_html if last_seen_html else '-' }}</strong>
+    </div>
+  </div>
+  {% if server.description %}
+  <p class="desc">{{ server.description }}</p>
+  {% endif %}
+</section>
+
+{% if can_manage %}
+<section class="section">
+  <h2 class="section-title">تعديل السيرفر</h2>
+  <form method="post" class="form-grid" autocomplete="off">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="field">
+      <span>اسم السيرفر</span>
+      <input type="text" name="name" value="{{ server.name }}" required maxlength="100">
+    </label>
+    <label class="field">
+      <span>نوع النظام</span>
+      <select name="os_type" required>
+        <option value="Linux" {% if server.os_type == 'Linux' %}selected{% endif %}>Linux</option>
+        <option value="Windows Server" {% if server.os_type == 'Windows Server' %}selected{% endif %}>Windows Server</option>
+      </select>
+    </label>
+    <label class="field">
+      <span>عنوان الشبكة</span>
+      <input type="text" name="host_address" value="{{ server.host_address }}" required maxlength="200">
+    </label>
+    <label class="field field-span">
+      <span>الوصف</span>
+      <input type="text" name="description" value="{{ server.description or '' }}" maxlength="300">
+    </label>
+    <div class="form-actions field-span">
+      <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
+    </div>
+  </form>
+</section>
+{% endif %}
+
+<section class="section">
+  <div class="section-head">
+    <h2 class="section-title">المخططات التاريخية</h2>
+    <div class="range-tabs" id="range-tabs">
+      <button type="button" class="btn btn-secondary active" data-range="hour">آخر ساعة</button>
+      <button type="button" class="btn btn-secondary" data-range="day">آخر يوم</button>
+      <button type="button" class="btn btn-secondary" data-range="week">آخر أسبوع</button>
+    </div>
+  </div>
+  <div class="charts-grid" data-server-id="{{ server.id }}">
+    <div class="chart-box">
+      <h3>المعالج (%)</h3>
+      <svg id="chart-cpu" class="chart-svg" viewBox="0 0 640 220" preserveAspectRatio="none"></svg>
+    </div>
+    <div class="chart-box">
+      <h3>الذاكرة (%)</h3>
+      <svg id="chart-ram" class="chart-svg" viewBox="0 0 640 220" preserveAspectRatio="none"></svg>
+    </div>
+    <div class="chart-box">
+      <h3>التخزين (%)</h3>
+      <svg id="chart-disk" class="chart-svg" viewBox="0 0 640 220" preserveAspectRatio="none"></svg>
+    </div>
+    <div class="chart-box">
+      <h3>زمن الاستجابة (مللي ثانية)</h3>
+      <svg id="chart-rt" class="chart-svg" viewBox="0 0 640 220" preserveAspectRatio="none"></svg>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">آخر تنبيهات هذا السيرفر</h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>النوع</th>
+          <th>الخطورة</th>
+          <th>الرسالة</th>
+          <th>الحالة</th>
+          <th>الوقت</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in alerts %}
+        <tr>
+          <td>{{ a.alert_type }}</td>
+          <td><span class="sev sev-{{ a.severity }}">{{ a.severity }}</span></td>
+          <td>{{ a.message }}</td>
+          <td>{% if a.is_resolved %}معالَج{% else %}مفتوح{% endif %}</td>
+          <td>{{ a.created_at_html }}</td>
+        </tr>
+        {% else %}
+        <tr class="empty-row"><td colspan="5">لا توجد تنبيهات لهذا السيرفر.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/server_details.js') }}"></script>
+{% endblock %}

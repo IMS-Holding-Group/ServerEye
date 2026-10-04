@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}التنبيهات - ServerEye{% endblock %}
+{% block page_title %}سجل التنبيهات{% endblock %}
+{% block content %}
+<section class="section">
+  <form method="get" class="filters-bar" id="alerts-filters">
+    <label class="field">
+      <span>السيرفر</span>
+      <select name="server_id">
+        <option value="">الكل</option>
+        {% for s in servers %}
+        <option value="{{ s.id }}" {% if filters.server_id == s.id|string %}selected{% endif %}>{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field">
+      <span>درجة الخطورة</span>
+      <select name="severity">
+        <option value="">الكل</option>
+        <option value="منخفضة" {% if filters.severity == 'منخفضة' %}selected{% endif %}>منخفضة</option>
+        <option value="متوسطة" {% if filters.severity == 'متوسطة' %}selected{% endif %}>متوسطة</option>
+        <option value="حرجة" {% if filters.severity == 'حرجة' %}selected{% endif %}>حرجة</option>
+      </select>
+    </label>
+    <label class="field">
+      <span>الحالة</span>
+      <select name="status">
+        <option value="">الكل</option>
+        <option value="open" {% if filters.status == 'open' %}selected{% endif %}>مفتوح</option>
+        <option value="resolved" {% if filters.status == 'resolved' %}selected{% endif %}>تمت معالجته</option>
+      </select>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">تصفية</button>
+    </div>
+  </form>
+</section>
+
+<section class="section">
+  <div class="table-wrap">
+    <table class="data-table" id="alerts-table">
+      <thead>
+        <tr>
+          <th>السيرفر</th>
+          <th>النوع</th>
+          <th>الخطورة</th>
+          <th>الرسالة</th>
+          <th>الحالة</th>
+          <th>وقت الإنشاء</th>
+          <th>إجراء</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in alerts %}
+        <tr data-alert-id="{{ a.id }}">
+          <td>{{ a.server_name }}</td>
+          <td>{{ a.alert_type }}</td>
+          <td><span class="sev sev-{{ a.severity }}">{{ a.severity }}</span></td>
+          <td>{{ a.message }}</td>
+          <td>{% if a.is_resolved %}معالَج{% else %}مفتوح{% endif %}</td>
+          <td>{{ a.created_at_html }}</td>
+          <td>
+            {% if can_resolve and not a.is_resolved %}
+            <form method="post" action="{{ url_for('alerts.resolve_alert', alert_id=a.id) }}" class="inline-form resolve-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button type="submit" class="btn btn-secondary">تعليم كمعالَج</button>
+            </form>
+            {% elif a.is_resolved %}
+            <span class="muted">-</span>
+            {% else %}
+            <span class="muted">-</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr class="empty-row"><td colspan="7">لا توجد تنبيهات مطابقة.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+{% endblock %}

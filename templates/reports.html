@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}التقارير - ServerEye{% endblock %}
+{% block page_title %}التقارير الدورية{% endblock %}
+{% block content %}
+<section class="section">
+  <form method="get" class="filters-bar">
+    <label class="field">
+      <span>الفترة</span>
+      <select name="period">
+        <option value="daily" {% if period == 'daily' %}selected{% endif %}>يومي</option>
+        <option value="weekly" {% if period == 'weekly' %}selected{% endif %}>أسبوعي</option>
+      </select>
+    </label>
+    <label class="field">
+      <span>السيرفر</span>
+      <select name="server_id">
+        <option value="">كل السيرفرات</option>
+        {% for s in servers %}
+        <option value="{{ s.id }}" {% if server_id == s.id|string %}selected{% endif %}>{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">عرض التقرير</button>
+      <a class="btn btn-secondary" href="{{ url_for('reports.export_report', period=period, server_id=server_id) }}">تصدير PDF</a>
+    </div>
+  </form>
+</section>
+
+<section class="section">
+  <p class="report-meta">
+    تقرير {{ report.period_label }} |
+    من {{ report.start_html }}
+    إلى {{ report.end_html }} |
+    تاريخ التوليد: {{ report.generated_html }}
+  </p>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>السيرفر</th>
+          <th>متوسط المعالج %</th>
+          <th>متوسط الذاكرة %</th>
+          <th>متوسط التخزين %</th>
+          <th>متوسط الاستجابة</th>
+          <th>عدد القراءات</th>
+          <th>تنبيهات حرجة</th>
+          <th>تنبيهات متوسطة</th>
+          <th>تنبيهات منخفضة</th>
+          <th>أطول استقرار (ساعة)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in report.rows %}
+        <tr>
+          <td>{{ row.server.name }}</td>
+          <td>{{ row.cpu_avg }}</td>
+          <td>{{ row.ram_avg }}</td>
+          <td>{{ row.disk_avg }}</td>
+          <td>{{ row.rt_avg }}</td>
+          <td>{{ row.readings }}</td>
+          <td>{{ row.alerts_critical }}</td>
+          <td>{{ row.alerts_medium }}</td>
+          <td>{{ row.alerts_low }}</td>
+          <td>{{ row.stable_hours }}</td>
+        </tr>
+        {% else %}
+        <tr class="empty-row"><td colspan="10">لا توجد بيانات ضمن الفترة المحددة.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

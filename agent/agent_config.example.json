@@ -1,0 +1,8 @@
+{
+  "server_url": "http://127.0.0.1:5000",
+  "agent_token": "ضع_مفتاح_الوكيل_هنا",
+  "interval_seconds": 60,
+  "disk_path": "",
+  "probe_host": "127.0.0.1",
+  "probe_port": null
+}

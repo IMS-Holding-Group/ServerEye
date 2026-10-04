@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}السيرفرات - ServerEye{% endblock %}
+{% block page_title %}إدارة السيرفرات{% endblock %}
+{% block content %}
+{% if new_token %}
+<div class="token-banner">
+  <strong>مفتاح اتصال الوكيل (يُعرض مرة واحدة):</strong>
+  <code id="agent-token">{{ new_token }}</code>
+  <button type="button" class="btn btn-secondary" id="copy-token">نسخ</button>
+</div>
+{% endif %}
+
+{% if can_manage %}
+<section class="section">
+  <h2 class="section-title">إضافة سيرفر جديد</h2>
+  <form method="post" class="form-grid" autocomplete="off">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="field">
+      <span>اسم السيرفر</span>
+      <input type="text" name="name" required maxlength="100">
+    </label>
+    <label class="field">
+      <span>نوع النظام</span>
+      <select name="os_type" required>
+        <option value="Linux">Linux</option>
+        <option value="Windows Server">Windows Server</option>
+      </select>
+    </label>
+    <label class="field">
+      <span>عنوان الشبكة (Hostname أو IP)</span>
+      <input type="text" name="host_address" required maxlength="200">
+    </label>
+    <label class="field field-span">
+      <span>وصف اختياري</span>
+      <input type="text" name="description" maxlength="300">
+    </label>
+    <div class="form-actions field-span">
+      <button type="submit" class="btn btn-primary">إضافة السيرفر</button>
+    </div>
+  </form>
+</section>
+{% endif %}
+
+<section class="section">
+  <h2 class="section-title">قائمة السيرفرات</h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>النظام</th>
+          <th>العنوان</th>
+          <th>الحالة</th>
+          <th>آخر اتصال</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in servers %}
+        <tr>
+          <td>{{ s.name }}{% if s.is_in_baseline %} <span class="tag">تعلّم</span>{% endif %}</td>
+          <td>{{ s.os_type }}</td>
+          <td>{{ s.host_address }}</td>
+          <td><span class="badge badge-{{ s.status }}">{{ s.status }}</span></td>
+          <td>{{ s.last_seen_html if s.last_seen_html else '-' }}</td>
+          <td class="actions">
+            <a class="btn btn-secondary" href="{{ url_for('servers.server_detail', server_id=s.id) }}">التفاصيل</a>
+            {% if can_manage %}
+            <form method="post" action="{{ url_for('servers.server_detail', server_id=s.id) }}" class="inline-form" onsubmit="return confirm('هل تريد حذف هذا السيرفر وكل بياناته؟');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="_method" value="DELETE">
+              <button type="submit" class="btn btn-danger">حذف</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr class="empty-row"><td colspan="6">لا توجد سيرفرات.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  const btn = document.getElementById('copy-token');
+  const tokenEl = document.getElementById('agent-token');
+  if (btn && tokenEl) {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(tokenEl.textContent.trim()).then(() => {
+        btn.textContent = 'تم النسخ';
+        setTimeout(() => { btn.textContent = 'نسخ'; }, 1500);
+      });
+    });
+  }
+})();
+</script>
+{% endblock %}

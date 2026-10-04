@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ServerEye{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.jpg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% if session.get('user_id') %}
+  <div class="app-shell">
+    <header class="mobile-header">
+      <button type="button" class="menu-toggle" id="menu-toggle" aria-label="فتح القائمة" aria-expanded="false">
+        <svg class="menu-toggle-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/></svg>
+      </button>
+      <a class="brand brand-compact" href="{{ url_for('dashboard.index') }}">
+        <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="ServerEye" class="brand-logo">
+        <span class="brand-text">ServerEye</span>
+      </a>
+      <span class="mobile-user">{{ current_username }}</span>
+    </header>
+    <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <a class="brand" href="{{ url_for('dashboard.index') }}">
+          <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="ServerEye" class="brand-logo">
+          <span class="brand-text">ServerEye</span>
+        </a>
+        <button type="button" class="sidebar-close" id="sidebar-close" aria-label="إغلاق القائمة">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.3 5.7L12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z"/></svg>
+        </button>
+      </div>
+      <nav class="nav">
+        {% if 'dashboard' in permissions %}
+        <a href="{{ url_for('dashboard.index') }}" class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+          <span>لوحة التحكم</span>
+        </a>
+        {% endif %}
+        {% if 'servers_view' in permissions %}
+        <a href="{{ url_for('servers.servers_list') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('servers.') %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 1h16v6H4V1zm0 8h16v6H4V9zm0 8h16v6H4v-6zM6 3v2h2V3H6zm0 8v2h2v-2H6zm0 8v2h2v-2H6z"/></svg>
+          <span>السيرفرات</span>
+        </a>
+        {% endif %}
+        {% if 'alerts_view' in permissions %}
+        <a href="{{ url_for('alerts.alerts_page') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('alerts.') %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z"/></svg>
+          <span>التنبيهات</span>
+        </a>
+        {% endif %}
+        {% if 'reports' in permissions %}
+        <a href="{{ url_for('reports.reports_page') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('reports.') %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5V3zm2 2v14h10V5H7zm2 2h6v2H9V7zm0 4h6v2H9v-2zm0 4h4v2H9v-2z"/></svg>
+          <span>التقارير</span>
+        </a>
+        {% endif %}
+        {% if 'users_manage' in permissions %}
+        <a href="{{ url_for('users.users_page') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('users.') %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/></svg>
+          <span>المستخدمون</span>
+        </a>
+        {% endif %}
+        {% if 'settings' in permissions %}
+        <a href="{{ url_for('settings.settings_page') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('settings.') %}active{% endif %}">
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94a7.43 7.43 0 0 0 .05-.94 7.43 7.43 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.2 7.2 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.76 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.62-.05.94s.02.63.05.94L2.88 14.5a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .6.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54a.5.5 0 0 0 .5.42h3.84a.5.5 0 0 0 .5-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96a.5.5 0 0 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5z"/></svg>
+          <span>الإعدادات</span>
+        </a>
+        {% endif %}
+      </nav>
+      <div class="sidebar-foot">
+        <div class="user-meta">
+          <strong>{{ current_username }}</strong>
+          <span>{{ role_labels.get(current_role, current_role) }}</span>
+        </div>
+        <a class="btn btn-ghost btn-block" href="{{ url_for('auth.logout') }}">تسجيل الخروج</a>
+      </div>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <h1 class="page-title">{% block page_title %}{% endblock %}</h1>
+        {% block top_actions %}{% endblock %}
+      </header>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-stack">
+          {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      {% endwith %}
+      <main class="content">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+  {% else %}
+    {% block auth_body %}{% endblock %}
+  {% endif %}
+  <script>window.CSRF_TOKEN = {{ (csrf_token|tojson) }};</script>
+  {% if session.get('user_id') %}
+  <script>
+  (function () {
+    const shell = document.querySelector('.app-shell');
+    const toggle = document.getElementById('menu-toggle');
+    const closeBtn = document.getElementById('sidebar-close');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (!shell || !toggle) return;
+    function openMenu() {
+      shell.classList.add('nav-open');
+      toggle.setAttribute('aria-expanded', 'true');
+      if (backdrop) backdrop.hidden = false;
+    }
+    function closeMenu() {
+      shell.classList.remove('nav-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      if (backdrop) backdrop.hidden = true;
+    }
+    toggle.addEventListener('click', () => {
+      if (shell.classList.contains('nav-open')) closeMenu();
+      else openMenu();
+    });
+    if (closeBtn) closeBtn.addEventListener('click', () => { closeMenu(); });
+    if (backdrop) backdrop.addEventListener('click', () => { closeMenu(); });
+  })();
+  </script>
+  {% endif %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

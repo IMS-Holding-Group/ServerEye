@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}المستخدمون - ServerEye{% endblock %}
+{% block page_title %}إدارة المستخدمين{% endblock %}
+{% block content %}
+<section class="section">
+  <h2 class="section-title">إضافة مستخدم</h2>
+  <form method="post" class="form-grid" autocomplete="off">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="action" value="create">
+    <label class="field">
+      <span>اسم المستخدم</span>
+      <input type="text" name="username" required maxlength="32" pattern="[A-Za-z0-9_]{3,32}">
+    </label>
+    <label class="field">
+      <span>كلمة السر</span>
+      <input type="password" name="password" required minlength="8">
+    </label>
+    <label class="field">
+      <span>الدور</span>
+      <select name="role" required>
+        {% for key, label in roles.items() %}
+        <option value="{{ key }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">إضافة</button>
+    </div>
+  </form>
+</section>
+
+<section class="section">
+  <h2 class="section-title">المستخدمون الحاليون</h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>اسم المستخدم</th>
+          <th>الدور</th>
+          <th>تاريخ الإنشاء</th>
+          <th>تعديل</th>
+          <th>حذف</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>{{ u.username }}</td>
+          <td>{{ u.role_label }}</td>
+          <td>{{ u.created_at_html }}</td>
+          <td>
+            <details class="edit-details">
+              <summary class="btn btn-secondary">تعديل</summary>
+              <form method="post" class="form-grid edit-form" autocomplete="off">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="user_id" value="{{ u.id }}">
+                <label class="field">
+                  <span>اسم المستخدم</span>
+                  <input type="text" name="username" value="{{ u.username }}" required maxlength="32">
+                </label>
+                <label class="field">
+                  <span>كلمة سر جديدة (اختياري)</span>
+                  <input type="password" name="password" minlength="8">
+                </label>
+                <label class="field">
+                  <span>الدور</span>
+                  <select name="role" required>
+                    {% for key, label in roles.items() %}
+                    <option value="{{ key }}" {% if u.role == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+                <button type="submit" class="btn btn-primary">حفظ</button>
+              </form>
+            </details>
+          </td>
+          <td>
+            {% if u.id != current_user_id %}
+            <form method="post" class="inline-form" onsubmit="return confirm('تأكيد حذف المستخدم؟');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="_method" value="DELETE">
+              <input type="hidden" name="user_id" value="{{ u.id }}">
+              <button type="submit" class="btn btn-danger">حذف</button>
+            </form>
+            {% else %}
+            <span class="muted">الحساب الحالي</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

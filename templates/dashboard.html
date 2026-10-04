@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}لوحة التحكم - ServerEye{% endblock %}
+{% block page_title %}لوحة التحكم{% endblock %}
+{% block content %}
+<section class="stats-row">
+  <div class="stat-box">
+    <span class="stat-label">عدد السيرفرات</span>
+    <strong class="stat-value" id="stat-servers">{{ servers|length }}</strong>
+  </div>
+  <div class="stat-box">
+    <span class="stat-label">تنبيهات مفتوحة</span>
+    <strong class="stat-value" id="stat-alerts">{{ unresolved }}</strong>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">السيرفرات المُراقَبة</h2>
+  <div class="server-grid" id="server-grid">
+    {% for s in servers %}
+    <a class="server-tile status-{{ s.status }}" href="{{ url_for('servers.server_detail', server_id=s.id) }}" data-server-id="{{ s.id }}">
+      <div class="tile-head">
+        <h3>{{ s.name }}</h3>
+        <span class="badge badge-{{ s.status }}">{{ s.status }}</span>
+      </div>
+      <p class="tile-meta">{{ s.os_type }} · {{ s.host_address }}</p>
+      {% if s.is_in_baseline %}<p class="tile-note">فترة تعلّم أولية</p>{% endif %}
+      <div class="metrics-mini">
+        <div><span>المعالج</span><strong class="m-cpu">{% if s.cpu is not none %}{{ s.cpu }}%{% else %}--{% endif %}</strong></div>
+        <div><span>الذاكرة</span><strong class="m-ram">{% if s.ram is not none %}{{ s.ram }}%{% else %}--{% endif %}</strong></div>
+        <div><span>التخزين</span><strong class="m-disk">{% if s.disk is not none %}{{ s.disk }}%{% else %}--{% endif %}</strong></div>
+      </div>
+    </a>
+    {% else %}
+    <p class="empty-note" id="empty-servers">لا توجد سيرفرات مسجّلة بعد.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">أحدث التنبيهات المفتوحة</h2>
+  <div class="table-wrap">
+    <table class="data-table" id="alerts-mini-table">
+      <thead>
+        <tr>
+          <th>السيرفر</th>
+          <th>النوع</th>
+          <th>الخطورة</th>
+          <th>الرسالة</th>
+          <th>الوقت</th>
+        </tr>
+      </thead>
+      <tbody id="alerts-mini-body">
+        {% for a in recent_alerts %}
+        <tr>
+          <td>{{ a.server_name }}</td>
+          <td>{{ a.alert_type }}</td>
+          <td><span class="sev sev-{{ a.severity }}">{{ a.severity }}</span></td>
+          <td>{{ a.message }}</td>
+          <td>{{ a.created_at_html }}</td>
+        </tr>
+        {% else %}
+        <tr class="empty-row"><td colspan="5">لا توجد تنبيهات مفتوحة.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

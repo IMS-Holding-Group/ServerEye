@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}الإعدادات - ServerEye{% endblock %}
+{% block page_title %}الإعدادات العامة{% endblock %}
+{% block content %}
+<section class="section">
+  <form method="post" class="form-grid settings-form" autocomplete="off">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="field">
+      <span>عتبة المعالج الحرجة (%)</span>
+      <input type="number" name="cpu_critical" min="1" max="100" step="0.1" value="{{ settings.get('cpu_critical', '90') }}" required>
+    </label>
+    <label class="field">
+      <span>عتبة الذاكرة الحرجة (%)</span>
+      <input type="number" name="ram_critical" min="1" max="100" step="0.1" value="{{ settings.get('ram_critical', '90') }}" required>
+    </label>
+    <label class="field">
+      <span>عتبة التخزين الحرجة (%)</span>
+      <input type="number" name="disk_critical" min="1" max="100" step="0.1" value="{{ settings.get('disk_critical', '90') }}" required>
+    </label>
+    <label class="field">
+      <span>عتبة زمن الاستجابة الحرجة (مللي ثانية)</span>
+      <input type="number" name="response_time_critical_ms" min="1" step="1" value="{{ settings.get('response_time_critical_ms', '2000') }}" required>
+    </label>
+    <label class="field">
+      <span>فترة إرسال الوكلاء الافتراضية (ثانية)</span>
+      <input type="number" name="agent_interval_seconds" min="10" step="1" value="{{ settings.get('agent_interval_seconds', '60') }}" required>
+    </label>
+    <label class="field checkbox-field">
+      <input type="checkbox" name="email_notify_enabled" {% if settings.get('email_notify_enabled', 'false') in ['true', '1', 'yes'] %}checked{% endif %}>
+      <span>تفعيل إشعارات البريد للتنبيهات الحرجة</span>
+    </label>
+    <p class="help-text field-span">بيانات اتصال البريد (المضيف، المنفذ، المستخدم، كلمة السر، المرسل) تُضبط حصراً عبر ملف <code>.env</code> ولا تُخزَّن هنا.</p>
+    <div class="form-actions field-span">
+      <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
+    </div>
+  </form>
+</section>
+{% endblock %}
