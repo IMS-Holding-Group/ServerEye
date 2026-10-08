@@ -51,9 +51,9 @@ def _hash_password(password):
 
 def _seed_default_users(conn):
     defaults = [
-        ('admin', 'Admin@12345', 'admin'),
-        ('soc_analyst', 'Soc@12345', 'soc_analyst'),
-        ('it_manager', 'Manager@12345', 'it_manager')
+        ('admin', '', 'admin'),
+        ('soc_analyst', '', 'soc_analyst'),
+        ('it_manager', '', 'it_manager')
     ]
     created_at = now_iso()
     for username, password, role in defaults:
